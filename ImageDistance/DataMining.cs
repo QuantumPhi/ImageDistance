@@ -2,11 +2,8 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
-using System.IO;
 using System.Linq;
-using System.Net;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace ImageDistance
 {
@@ -23,11 +20,7 @@ namespace ImageDistance
         }
 
         public IEnumerable<Bitmap> NextImage()
-        {
-            HttpWebRequest req = (HttpWebRequest)WebRequest.Create("http://www.bing.com/images/search?q=" + query);
-            HttpWebResponse res = (HttpWebResponse)req.GetResponse();
-            Stream resStream = res.GetResponseStream();
-            
+        {            
             yield return null;
         }
     }
