@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -18,6 +20,15 @@ namespace ImageDistance
             Trace.Assert(threshold > 0 && threshold <= 1, "Improper threshold.");
             this.Threshold = threshold;
             this.query = query;
+        }
+
+        public IEnumerable<Bitmap> NextImage()
+        {
+            HttpWebRequest req = (HttpWebRequest)WebRequest.Create("http://www.bing.com/images/search?q=" + query);
+            HttpWebResponse res = (HttpWebResponse)req.GetResponse();
+            Stream resStream = res.GetResponseStream();
+            
+            yield return null;
         }
     }
 
@@ -40,7 +51,7 @@ namespace ImageDistance
             return negative;
         }
 
-        public static double Distance(this Bitmap origin, Bitmap target)
+        public static double PixelDistance(this Bitmap origin, Bitmap target)
         {
             Trace.Assert(origin.Width == target.Width && origin.Height == target.Height, "Images different sizes.");
             return Enumerable.Range(0, origin.Width * origin.Height)
@@ -48,7 +59,7 @@ namespace ImageDistance
                 {
                     var i = x % origin.Width;
                     var j = x / origin.Width;
-
+                    
                     var pixel_o = origin.GetPixel(i, j);
                     var pixel_t = origin.GetPixel(i, j);
 
@@ -57,9 +68,20 @@ namespace ImageDistance
                 .Sum();
         }
 
-        public static bool Similar(this Bitmap origin, Bitmap target, double threshold)
+        public static double ColorDistance(this Bitmap origin, Bitmap target)
         {
-            return origin.Distance(target) < origin.Distance(origin.Negative()) * threshold;
+            Trace.Assert(origin.Width == target.Width && origin.Height == target.Height, "Images different sizes.");
+            return Enumerable.Range(0, origin.Width * origin.Height)
+                .Select(x =>
+                {
+                    return 0;
+                })
+                .Sum();
+        }
+
+        public static bool Similar(this Bitmap origin, Bitmap target, double threshold, bool color)
+        {
+            return color ? origin.ColorDistance(target) < origin.ColorDistance(origin.Negative()) * threshold : origin.PixelDistance(target) < origin.PixelDistance(origin.Negative()) * threshold;
         }
     }
 }
